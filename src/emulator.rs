@@ -19,7 +19,7 @@ pub struct ChipEight {
     stack: [u16; 16],
     sp: u16,
     key: [u16; 16],
-    draw_flag: bool;
+    draw_flag: bool
 }
 
 
@@ -76,16 +76,16 @@ impl ChipEight {
                 let rows = (self.opcode & 0xF) as usize;
 
                 // Set to true on collision
-                self.regs[0xF] = false;
+                self.regs[0xF] = 0;
 
                 for row in 0..rows {
-                    let row_pixels = self.memory[self.index_reg + row];
+                    let row_pixels = self.memory[self.index_reg as usize + row];
                     for col in 0..8 {
                         if 0x80 >> col & row_pixels == 0 { continue; }
 
                         let current_coord = (SCREEN_WIDTH * (start_y + rows)) + start_x + col;
                         if self.display[current_coord] {
-                            self.regs[0xF] = true;
+                            self.regs[0xF] = 1;
                         }
 
                         self.display[current_coord] ^= true;
@@ -94,8 +94,8 @@ impl ChipEight {
 
                 self.draw_flag = true;
                 self.pc += 2;
-            }
-
+            },
+            instruction => println!("Unknown instructions: {:x}", instruction)
         }
     }
 
@@ -111,10 +111,6 @@ impl ChipEight {
 
     fn execute(&self) {
 
-    }
-
-    fn convert_from_coord(x: usize, y: usize) -> usize {
-        SCREEN_WIDTH * y + x
     }
 
 }

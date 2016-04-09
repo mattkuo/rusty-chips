@@ -101,6 +101,22 @@ impl ChipEight {
                 self.draw_flag = true;
                 self.pc += 2;
             },
+            0xF000 => {
+                let x_value = self.regs[(self.opcode & 0xF00 >> 8) as usize];
+
+                match self.opcode & 0xFF {
+                    // FX33
+                    0x33 => {
+                        let mut x_value = x_value;
+                        for offset in (0..3).rev() {
+                            self.memory[self.index_reg as usize + offset] = x_value % 10;
+                            x_value /= 10;
+                        }
+                        self.pc += 2;
+                    },
+                    instruction => println!("Unknown instructions: {:x}", instruction)
+                }
+            },
             instruction => println!("Unknown instructions: {:x}", instruction)
         }
     }

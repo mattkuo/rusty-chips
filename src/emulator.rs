@@ -1,6 +1,10 @@
+extern crate rand;
+
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+
+use rand::{Rng, ThreadRng};
 
 // use 0x600 for ETI 660 programs
 const PROGRAM_MEM_START: usize = 0x200;
@@ -38,7 +42,8 @@ pub struct ChipEight {
     stack: [u16; 16],
     sp: usize,
     keypad: [u16; 16],
-    draw_flag: bool
+    draw_flag: bool,
+    rng: ThreadRng
 }
 
 
@@ -57,7 +62,8 @@ impl ChipEight {
             stack: [0x0; 16],
             sp: 0,
             keypad: [0x0; 16],
-            draw_flag: false
+            draw_flag: false,
+            rng: rand::thread_rng()
         };
 
         for index in 0..FONT_MAP.len() {
@@ -91,6 +97,10 @@ impl ChipEight {
                     },
                     instruction => println!("Unknown instructions: {:x}", instruction)
                 }
+            },
+            // 1NNN	Jumps to address NNN.
+            0x1000 => {
+                self.pc = self.opcode & 0xFFF;
             },
             // 2NNN	Calls subroutine at NNN
             0x2000 => {
@@ -126,6 +136,15 @@ impl ChipEight {
             // ANNN	Sets index_reg to the address NNN.
             0xA000 => {
                 self.index_reg = self.opcode & 0xFFF;
+                self.pc += 2;
+            },
+            // CXNN Sets VX to the result of a bitwise and operation on a random number and NN.
+            0xC000 => {
+                let x = self.opcode & 0xF00 >> 8;
+                let nn = self.opcode as u8;
+                let random_num = self.rng.gen::<u8>();
+
+                self.regs[x as usize] = nn & random_num;
                 self.pc += 2;
             },
             // DXYN Display drawing code

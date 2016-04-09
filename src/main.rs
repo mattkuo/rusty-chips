@@ -1,3 +1,4 @@
+extern crate rand;
 mod emulator;
 
 use std::env;

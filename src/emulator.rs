@@ -114,6 +114,15 @@ impl ChipEight {
                         }
                         self.pc += 2;
                     },
+                    // FX65
+                    0x65 => {
+                        let mut current_address = self.index_reg as usize;
+                        for reg in 0..x_value + 1 {
+                            self.regs[reg as usize] = self.memory[current_address];
+                            current_address += 1;
+                        }
+                        self.pc += 2;
+                    },
                     instruction => println!("Unknown instructions: {:x}", instruction)
                 }
             },

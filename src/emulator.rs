@@ -82,17 +82,45 @@ impl ChipEight {
         self.opcode = self.fetch();
 
         match self.opcode & 0xF000 {
+            0x0000 => {
+                match self.opcode & 0xFF {
+                    // 00EE	Returns from a subroutine.
+                    0xEE => {
+                        self.sp -= 1;
+                        self.pc = self.stack[self.sp];
+                    },
+                    instruction => println!("Unknown instructions: {:x}", instruction)
+                }
+            },
             // 2NNN	Calls subroutine at NNN
             0x2000 => {
                 self.stack[self.sp] = self.pc + 2;
                 self.sp += 1;
                 self.pc = self.opcode & 0xFFF;
-            }
+            },
+            // 3XNN	Skips the next instruction if VX equals NN.
+            0x3000 => {
+                let x = self.opcode & 0xF00 >> 8;
+                let nn = self.opcode & 0xFF;
+
+                if self.regs[x as usize] == nn as u8 {
+                    self.pc += 4;
+                } else {
+                    self.pc += 2;
+                }
+            },
             // 6XNN Sets VX to NN.
             0x6000 => {
                 let reg_n = (self.opcode & 0xF00 >> 8) as usize;
                 let value = self.opcode as u8;
                 self.regs[reg_n] = value;
+                self.pc += 2;
+            },
+            // 7XNN Adds NN to VX.
+            0x7000 => {
+                let x = self.opcode & 0xF00 >> 8;
+                let nn = self.opcode & 0xFF;
+                self.regs[x as usize] += nn as u8;
                 self.pc += 2;
             },
             // ANNN	Sets index_reg to the address NNN.
@@ -130,6 +158,11 @@ impl ChipEight {
                 let x_value = self.regs[(self.opcode & 0xF00 >> 8) as usize];
 
                 match self.opcode & 0xFF {
+                    // FX29
+                    0x29 => {
+                        self.index_reg = (self.regs[x_value as usize] * 5) as u16;
+                        self.pc += 2;
+                    },
                     // FX33
                     0x33 => {
                         let mut x_value = x_value;

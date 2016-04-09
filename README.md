@@ -6,7 +6,7 @@
 - [ ] 00E0	Clears the screen.
 - [ ] 00EE	Returns from a subroutine.
 - [ ] 1NNN	Jumps to address NNN.
-- [ ] 2NNN	Calls subroutine at NNN.
+- [x] 2NNN	Calls subroutine at NNN.
 - [ ] 3XNN	Skips the next instruction if VX equals NN.
 - [ ] 4XNN	Skips the next instruction if VX doesn't equal NN.
 - [ ] 5XY0	Skips the next instruction if VX equals VY.

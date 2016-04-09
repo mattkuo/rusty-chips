@@ -17,8 +17,8 @@ pub struct ChipEight {
     delay_timer: u16,
     sound_timer: u16,
     stack: [u16; 16],
-    sp: u16,
-    key: [u16; 16],
+    sp: usize,
+    keypad: [u16; 16],
     draw_flag: bool
 }
 
@@ -36,8 +36,8 @@ impl ChipEight {
             delay_timer: 0,
             sound_timer: 0,
             stack: [0x0; 16],
-            sp: 0x0,
-            key: [0x0; 16],
+            sp: 0,
+            keypad: [0x0; 16],
             draw_flag: false
         }
     }
@@ -46,7 +46,7 @@ impl ChipEight {
         let mut file = File::open(path).unwrap();
 
         let mut buffer = Vec::new();
-        let mut bytes_read = file.read_to_end(&mut buffer).unwrap();
+        let bytes_read = file.read_to_end(&mut buffer).unwrap();
 
         for i in 0..bytes_read {
             self.memory[PROGRAM_MEM_START + i] = buffer[i];
@@ -57,6 +57,12 @@ impl ChipEight {
         self.opcode = self.fetch();
 
         match self.opcode & 0xF000 {
+            // 2NNN	Calls subroutine at NNN
+            0x2000 => {
+                self.stack[self.sp] = self.pc + 2;
+                self.sp += 1;
+                self.pc = self.opcode & 0xFFF;
+            }
             // 6XNN Sets VX to NN.
             0x6000 => {
                 let reg_n = (self.opcode & 0xF00 >> 8) as usize;
@@ -103,14 +109,6 @@ impl ChipEight {
         let nibble1 = (self.memory[self.pc as usize] as u16) << 8;
         let nibble2 = self.memory[(self.pc + 1) as usize] as u16;
         nibble1 | nibble2
-    }
-
-    fn decode(&self) {
-
-    }
-
-    fn execute(&self) {
-
     }
 
 }

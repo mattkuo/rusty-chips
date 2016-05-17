@@ -1,9 +1,12 @@
 extern crate rand;
+extern crate piston_window;
+
 mod emulator;
 
 use std::env;
 use std::io::prelude::*;
 use std::path::Path;
+use piston_window::*;
 use emulator::ChipEight;
 
 fn main() {
@@ -20,8 +23,19 @@ fn main() {
     let prog_path = Path::new(&args[1]);
     emulator.load_memory(&prog_path);
 
+    let mut window: PistonWindow = WindowSettings::new(
+        "Rusty Chips",
+        [emulator::SCREEN_WIDTH as u32, emulator::SCREEN_HEIGHT as u32]
+    ).exit_on_esc(true)
+    .build()
+    .unwrap();
+
     loop {
         emulator.emulate_cycle();
+        let mut events = window.events();
+        while let Some(e) = events.next(&mut window) {
+
+        }
     }
 
 }

@@ -6,10 +6,11 @@ use std::path::Path;
 
 use rand::{Rng, ThreadRng};
 
+pub const SCREEN_WIDTH: usize = 64;
+pub const SCREEN_HEIGHT: usize = 32;
+
 // use 0x600 for ETI 660 programs
 const PROGRAM_MEM_START: usize = 0x200;
-const SCREEN_WIDTH: usize = 64;
-const SCREEN_HEIGHT: usize = 32;
 
 const FONT_MAP: [u8; 5 * 16] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -95,7 +96,7 @@ impl ChipEight {
                         self.sp -= 1;
                         self.pc = self.stack[self.sp];
                     },
-                    instruction => println!("Unknown instructions: {:x}", instruction)
+                    instruction => println!("Unknown instructions 0x0: {:x}", instruction)
                 }
             },
             // 1NNN	Jumps to address NNN.
@@ -200,7 +201,7 @@ impl ChipEight {
                         }
                         self.pc += 2;
                     },
-                    instruction => println!("Unknown instructions: {:x}", instruction)
+                    instruction => println!("Unknown instructions 0xF: {:x}", instruction)
                 }
             },
             instruction => println!("Unknown instructions: {:x}", instruction)

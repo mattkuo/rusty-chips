@@ -30,12 +30,14 @@ fn main() {
     .build()
     .unwrap();
 
-    loop {
-        emulator.emulate_cycle();
-        let mut events = window.events();
-        while let Some(e) = events.next(&mut window) {
+    let mut events = window.events();
+    while let Some(e) = events.next(&mut window) {
 
+        if let Some(u) = e.update_args() {
+            emulator.update_timer(u.dt);
+            emulator.emulate_cycle();
         }
+
     }
 
 }

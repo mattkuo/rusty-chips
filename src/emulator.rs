@@ -9,6 +9,9 @@ use rand::{Rng, ThreadRng};
 pub const SCREEN_WIDTH: usize = 64;
 pub const SCREEN_HEIGHT: usize = 32;
 
+// Hertz
+const CLOCK_SPEED: f64 = 60.0;
+
 // use 0x600 for ETI 660 programs
 const PROGRAM_MEM_START: usize = 0x200;
 
@@ -40,6 +43,7 @@ pub struct ChipEight {
     display: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
     delay_timer: u16,
     sound_timer: u16,
+    tick_timer: f64,
     stack: [u16; 16],
     sp: usize,
     keypad: [u16; 16],
@@ -60,6 +64,7 @@ impl ChipEight {
             display: [false; 2048],
             delay_timer: 0,
             sound_timer: 0,
+            tick_timer: 0.0,
             stack: [0x0; 16],
             sp: 0,
             keypad: [0x0; 16],
@@ -206,6 +211,23 @@ impl ChipEight {
             },
             instruction => println!("Unknown instructions: {:x}", instruction)
         }
+    }
+
+    pub fn update_timer(&mut self, delta:f64) {
+        self.tick_timer += delta;
+        if self.tick_timer < 1.0 / CLOCK_SPEED {
+            return;
+        }
+
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+
+        if self.sound_timer > 0 {
+            self.delay_timer -= 1;
+        }
+
+        self.tick_timer = 0.0;
     }
 
     fn fetch(&mut self) -> u16 {
